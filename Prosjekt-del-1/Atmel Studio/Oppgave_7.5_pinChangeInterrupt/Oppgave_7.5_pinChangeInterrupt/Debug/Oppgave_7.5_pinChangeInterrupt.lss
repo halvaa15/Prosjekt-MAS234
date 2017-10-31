@@ -3,29 +3,29 @@ Oppgave_7.5_pinChangeInterrupt.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  00000134  2**0
+  0 .data         00000000  00800100  00800100  0000012e  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         000000e0  00000000  00000000  00000054  2**1
+  1 .text         000000da  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  00000134  2**0
+  2 .comment      00000030  00000000  00000000  0000012e  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000164  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000160  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000028  00000000  00000000  000001a0  2**0
+  4 .debug_aranges 00000028  00000000  00000000  0000019c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   0000071a  00000000  00000000  000001c8  2**0
+  5 .debug_info   0000071a  00000000  00000000  000001c4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 00000680  00000000  00000000  000008e2  2**0
+  6 .debug_abbrev 00000680  00000000  00000000  000008de  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000264  00000000  00000000  00000f62  2**0
+  7 .debug_line   00000270  00000000  00000000  00000f5e  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000050  00000000  00000000  000011c8  2**2
+  8 .debug_frame  00000048  00000000  00000000  000011d0  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000003f0  00000000  00000000  00001218  2**0
+  9 .debug_str    00000418  00000000  00000000  00001218  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    0000009e  00000000  00000000  00001608  2**0
+ 10 .debug_loc    00000091  00000000  00000000  00001630  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000018  00000000  00000000  000016a6  2**0
+ 11 .debug_ranges 00000018  00000000  00000000  000016c1  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -66,7 +66,7 @@ Disassembly of section .text:
   70:	de bf       	out	0x3e, r29	; 62
   72:	cd bf       	out	0x3d, r28	; 61
   74:	0e 94 40 00 	call	0x80	; 0x80 <main>
-  78:	0c 94 6e 00 	jmp	0xdc	; 0xdc <_exit>
+  78:	0c 94 6b 00 	jmp	0xd6	; 0xd6 <_exit>
 
 0000007c <__bad_interrupt>:
   7c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -77,15 +77,15 @@ Disassembly of section .text:
 
 int main(void)
 {
-	DDRB &= ~(1 << PB0);
+	DDRB &= ~(1 << PB0);		// set pin 0 PORTB as input
   80:	20 98       	cbi	0x04, 0	; 4
-	PORTB |= (1 << PB0);
+	PORTB |= (1 << PB0);		// set pin 0 PORTB true (pull up)
   82:	28 9a       	sbi	0x05, 0	; 5
 	
-	DDRD |= (1 << PD6);
+	DDRD |= (1 << PD6);			// set pin 6 PORTD as output
   84:	56 9a       	sbi	0x0a, 6	; 10
 	
-	PCICR |= (1 << PCIE0);
+	PCICR |= (1 << PCIE0);		// 
   86:	e8 e6       	ldi	r30, 0x68	; 104
   88:	f0 e0       	ldi	r31, 0x00	; 0
   8a:	80 81       	ld	r24, Z
@@ -114,9 +114,11 @@ ISR(PCINT0_vect)
   a2:	0f b6       	in	r0, 0x3f	; 63
   a4:	0f 92       	push	r0
   a6:	11 24       	eor	r1, r1
-  a8:	2f 93       	push	r18
-  aa:	8f 93       	push	r24
-  ac:	9f 93       	push	r25
+  a8:	8f 93       	push	r24
+  aa:	9f 93       	push	r25
+	cli();
+  ac:	f8 94       	cli
+	
 	if (!(PINB & (1 << PB0)))
   ae:	18 99       	sbic	0x03, 0	; 3
   b0:	04 c0       	rjmp	.+8      	; 0xba <__vector_3+0x1c>
@@ -132,29 +134,29 @@ PORTD ^= (1 << PD6);
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
-  ba:	2f ef       	ldi	r18, 0xFF	; 255
-  bc:	83 ef       	ldi	r24, 0xF3	; 243
-  be:	91 e0       	ldi	r25, 0x01	; 1
-  c0:	21 50       	subi	r18, 0x01	; 1
-  c2:	80 40       	sbci	r24, 0x00	; 0
-  c4:	90 40       	sbci	r25, 0x00	; 0
-  c6:	e1 f7       	brne	.-8      	; 0xc0 <__vector_3+0x22>
-  c8:	00 c0       	rjmp	.+0      	; 0xca <__vector_3+0x2c>
-  ca:	00 00       	nop
+  ba:	8f e1       	ldi	r24, 0x1F	; 31
+  bc:	9e e4       	ldi	r25, 0x4E	; 78
+  be:	01 97       	sbiw	r24, 0x01	; 1
+  c0:	f1 f7       	brne	.-4      	; 0xbe <__vector_3+0x20>
+  c2:	00 c0       	rjmp	.+0      	; 0xc4 <__vector_3+0x26>
+  c4:	00 00       	nop
 	}
-	_delay_ms (40);
+	
+	_delay_ms (5);
+	
+	sei();
+  c6:	78 94       	sei
 }
-  cc:	9f 91       	pop	r25
-  ce:	8f 91       	pop	r24
-  d0:	2f 91       	pop	r18
-  d2:	0f 90       	pop	r0
-  d4:	0f be       	out	0x3f, r0	; 63
-  d6:	0f 90       	pop	r0
-  d8:	1f 90       	pop	r1
-  da:	18 95       	reti
+  c8:	9f 91       	pop	r25
+  ca:	8f 91       	pop	r24
+  cc:	0f 90       	pop	r0
+  ce:	0f be       	out	0x3f, r0	; 63
+  d0:	0f 90       	pop	r0
+  d2:	1f 90       	pop	r1
+  d4:	18 95       	reti
 
-000000dc <_exit>:
-  dc:	f8 94       	cli
+000000d6 <_exit>:
+  d6:	f8 94       	cli
 
-000000de <__stop_program>:
-  de:	ff cf       	rjmp	.-2      	; 0xde <__stop_program>
+000000d8 <__stop_program>:
+  d8:	ff cf       	rjmp	.-2      	; 0xd8 <__stop_program>

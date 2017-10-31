@@ -30,9 +30,14 @@ int main(void)
 
 ISR(PCINT0_vect)
 {	
+	cli();
+	
 	if (!(PINB & (1 << PB0)))
 	{
 PORTD ^= (1 << PD6);
 	}
-	_delay_ms (40);
+	
+	_delay_ms (5);
+	
+	sei();
 }

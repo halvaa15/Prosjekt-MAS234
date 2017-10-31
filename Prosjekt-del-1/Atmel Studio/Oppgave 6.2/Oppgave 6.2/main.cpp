@@ -5,37 +5,33 @@
  * Author : Fredrik
  */ 
 
+#define F_CPU	16000000UL
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/delay.h>
 
-bool pinChange = 0;
+double dutyCycle = 100.0;
+
 
 
 int main(void)
 {
-	DDRB = (0 << PB0);
-	DDRD = (1 << PD6);
-	//PORTB |= (1 << PB0);
+	DDRB = (1 << PB1);
 	
-	PCMSK0 |= (1<<PCINT0);
-	
-	PCICR |= (1<<PCIE0);
+	TCCR1A = (1 << COM1A1) | (1 << WGM10) | (1 << WGM11) | (1 << WGM12);
+	TIMSK1 = (1 << TOIE1);
 	
 	sei();
+	
+	TCCR1B = (1 << CS12) | (1 << CS10);
+	OCR1A = (dutyCycle/100.0)*1023;
+	
+	while(1)
+	{
+	}
 }
 
-ISR(PCINT0_vect)
+ISR(TIMER1_OVF_vect)
 {
-	pinChange = !pinChange;
-	
-	if (pinChange == 1)
-	{
-		PORTD |= (1 << PD6);
-	}
-	
-	if (pinChange == 0)
-	{
-		PORTD &= 0b10111111;
-	}
-
 }
