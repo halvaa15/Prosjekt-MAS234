@@ -14,12 +14,15 @@
 //
 
 #include <FlexCAN.h>
+#include <Metro.h>
 
 #ifndef __MK66FX1M0__
   #error "Teensy 3.6 with dual CAN bus is required to run this example"
 #endif
 
 const int ledPin = 13;
+
+Metro ledMetro = Metro(1000);
 
 static CAN_message_t msg;
 static uint8_t hex[17] = "0123456789abcdef";
@@ -42,10 +45,9 @@ static void hexDump(uint8_t dumpLen, uint8_t *bytePtr)
 void setup(void)
 {
   delay(1000);
-  Serial.println(F("Hello Teensy 3.6 dual CAN Test."));
 
   pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, HIGH);   //Setter ledPin
+  digitalWrite(ledPin, HIGH);   //Setter ledPin høy når programmet starter
 
   struct CAN_filter_t defaultMask;
 
@@ -80,17 +82,34 @@ void setup(void)
 // -------------------------------------------------------------
 void loop(void)
 { 
+  if (ledMetro.check())
+  {
+    Serial.println("Ja");
+  }
+  
   CAN_message_t inMsg;
   while (Can0.available()) 
   {
     Can0.read(inMsg);
-    Serial.print("CAN bus 0: "); hexDump(8, inMsg.buf);
-    Serial.println(inMsg.buf[2]);
-    Serial.println(inMsg.id);
    
     if (inMsg.id == 33)
     {
-    digitalWrite (ledPin, !digitalRead(ledPin));
+      digitalWrite (ledPin, !digitalRead(ledPin));
+      Serial.println("Lyset toggles");
     }
+    
+    if (((inMsg.buf[7] &= (1)) == (1)) && (inMsg.id == (34)))
+    {
+      digitalWrite(ledPin, HIGH);
+      Serial.println("Lyset settes høy");
+    }
+    
+    if (((inMsg.buf[7] &= (1)) == (0)) && (inMsg.id == (34)))
+    {
+      digitalWrite(ledPin, LOW);
+      Serial.println("Lyset settes lavt");
+    }
+    
+    
   }
 }

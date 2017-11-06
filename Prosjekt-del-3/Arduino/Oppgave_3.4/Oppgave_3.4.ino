@@ -84,13 +84,15 @@ void loop(void)
   while (Can0.available()) 
   {
     Can0.read(inMsg);
-    Serial.print("CAN bus 0: "); hexDump(8, inMsg.buf);
-    Serial.println(inMsg.buf[2]);
-    Serial.println(inMsg.id);
-   
+
+  Serial.println(inMsg.id);
     if (inMsg.id == 33)
     {
-    digitalWrite (ledPin, !digitalRead(ledPin));
+      digitalWrite(ledPin, HIGH);
+    }
+    if (inMsg.id == (34))
+    {
+      digitalWrite(ledPin, LOW);
     }
   }
 }
