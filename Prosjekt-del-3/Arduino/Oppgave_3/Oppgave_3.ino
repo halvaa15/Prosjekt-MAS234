@@ -15,6 +15,13 @@
 
 #include <FlexCAN.h>
 
+#include <Metro.h>
+  Metro ledMetro = Metro(1000);
+
+#include<Wire.h>
+  const int MPU_addr=0x68;  // I2C address of the MPU-6050
+  int16_t AcX,AcY,AcZ;
+
 #ifndef __MK66FX1M0__
   #error "Teensy 3.6 with dual CAN bus is required to run this example"
 #endif
@@ -42,10 +49,9 @@ static void hexDump(uint8_t dumpLen, uint8_t *bytePtr)
 void setup(void)
 {
   delay(1000);
-  Serial.println(F("Hello Teensy 3.6 dual CAN Test."));
 
   pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, HIGH);   //Setter ledPin
+  digitalWrite(ledPin, HIGH);
 
   struct CAN_filter_t defaultMask;
 
@@ -74,6 +80,15 @@ void setup(void)
   msg.buf[5] = 64;
   msg.buf[6] = 32;
   msg.buf[7] = 16;
+
+    //Code to make the IMU work
+  Wire.begin();
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x6B);  // PWR_MGMT_1 register
+  Wire.write(0);     // set to zero (wakes up the MPU-6050)
+  Wire.endTransmission(true);
+  Serial.begin(9600);
+
 }
 
 
@@ -81,16 +96,45 @@ void setup(void)
 void loop(void)
 { 
   CAN_message_t inMsg;
+  
+  if (ledMetro.check())   //inMsg.id == 32
+  {
+    Wire.beginTransmission(MPU_addr);
+    Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
+    Wire.endTransmission(false);
+    Wire.requestFrom(MPU_addr,14,true);  // request a total of 14 registers
+    AcX=Wire.read()<<8|Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)    
+    AcY=Wire.read()<<8|Wire.read();  // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
+    AcZ=Wire.read()<<8|Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+
+    Serial.print("AcX = "); Serial.print(AcX);
+    Serial.print(" | AcY = "); Serial.print(AcY);
+    Serial.print(" | AcZ = "); Serial.println(AcZ);
+  }
+  
+  
   while (Can0.available()) 
   {
     Can0.read(inMsg);
-    Serial.print("CAN bus 0: "); hexDump(8, inMsg.buf);
-    Serial.println(inMsg.buf[2]);
-    Serial.println(inMsg.id);
    
-    if (inMsg.id == 33)
+    if (inMsg.id == 0x21)
     {
-    digitalWrite (ledPin, !digitalRead(ledPin));
+      digitalWrite (ledPin, !digitalRead(ledPin));
+      Serial.println("Lyset toggles");
     }
+    
+    if (((inMsg.buf[7] &= (1)) == (1)) && (inMsg.id == (0x22)))
+    {
+      digitalWrite(ledPin, HIGH);
+      Serial.println("Lyset settes høy");
+    }
+    
+    if (((inMsg.buf[7] &= (1)) == (0)) && (inMsg.id == (0x22)))
+    {
+      digitalWrite(ledPin, LOW);
+      Serial.println("Lyset settes lavt");
+    }
+    
+    
   }
 }
