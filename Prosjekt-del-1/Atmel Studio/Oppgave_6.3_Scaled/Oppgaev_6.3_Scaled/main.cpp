@@ -1,7 +1,7 @@
 /*
- * Oppgave_6.3_NonScaled.cpp
+ * Oppgaev_6.3_Scaled.cpp
  *
- * Created: 28.10.2017 16:21:20
+ * Created: 28.10.2017 16:37:02
  * Author : Fredrik
  */ 
 
@@ -13,6 +13,7 @@
 
 double dutyCycle = 0.0;
 int counterDir = 1;
+double lightConv = 0.0;
 
 void PWM_init_8bit()	// initializing PWM 8-bit
 {
@@ -37,17 +38,19 @@ int main(void)
 }
 
 ISR(TIMER0_OVF_vect)
-{
+{	
 	if (dutyCycle < 0.0)	// Prevents dutycycle from decreasing below 100 (causing OCR0A error)
 	{
 		dutyCycle = 0.0;
 	}
 	if (dutyCycle > 100.0)// Prevents dutycycle from increasing above 100 (causing OCR0A error)
 	{
-	dutyCycle = 100.0;		
+		dutyCycle = 100.0;
 	}
 
-	OCR0A = (dutyCycle/100.0)*255.0;	// updates OCR0A value at every interrupt
+	lightConv = (pow(dutyCycle,2)) / (100);	// converts calculated light value to perceived light value
+	
+	OCR0A = (lightConv/100.0)*255.0;	// updates OCR0A value at every interrupt
 	
 	if (dutyCycle >= 100.0)	// flag for dimming down
 	{
@@ -67,3 +70,4 @@ ISR(TIMER0_OVF_vect)
 		dutyCycle -= 1.64;	// 1.64 sets blinking cycle to 2s
 	}
 }
+
