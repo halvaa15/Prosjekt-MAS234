@@ -95,46 +95,28 @@ void setup(void)
 // -------------------------------------------------------------
 void loop(void)
 { 
-  CAN_message_t inMsg;
   
-  if (ledMetro.check())   //inMsg.id == 32
+ 
+  while (ledMetro.check()) 
   {
-    Wire.beginTransmission(MPU_addr);
-    Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
-    Wire.endTransmission(false);
-    Wire.requestFrom(MPU_addr,14,true);  // request a total of 14 registers
-    AcX=Wire.read()<<8|Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)    
-    AcY=Wire.read()<<8|Wire.read();  // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
-    AcZ=Wire.read()<<8|Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+      CAN_message_t outMsg;
+ 
+      Wire.beginTransmission(MPU_addr);
+      Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
+      Wire.endTransmission(false);
+      Wire.requestFrom(MPU_addr,14,true);  // request a total of 14 registers
 
-    Serial.print("AcX = "); Serial.print(AcX);
-    Serial.print(" | AcY = "); Serial.print(AcY);
-    Serial.print(" | AcZ = "); Serial.println(AcZ);
-  }
-  
-  
-  while (Can0.available()) 
-  {
-    Can0.read(inMsg);
-   
-    if (inMsg.id == 0x21)
-    {
-      digitalWrite (ledPin, !digitalRead(ledPin));
-      Serial.println("Lyset toggles");
-    }
+      int8_t acc [6];
+      acc[0]=Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
+      acc[1]=Wire.read();
+      acc[2]=Wire.read();  // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
+      acc[3]=Wire.read();
+      acc[4]=Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+      acc[5]=Wire.read();
     
-    if (((inMsg.buf[7] &= (1)) == (1)) && (inMsg.id == (0x22)))
-    {
-      digitalWrite(ledPin, HIGH);
-      Serial.println("Lyset settes høy");
-    }
-    
-    if (((inMsg.buf[7] &= (1)) == (0)) && (inMsg.id == (0x22)))
-    {
-      digitalWrite(ledPin, LOW);
-      Serial.println("Lyset settes lavt");
-    }
-    
-    
+    outMsg.id = 0x22;   //
+    outMsg.len = 6U;    //The lenght of the message is 6 unsigned int
+    memcpy (outMsg.buf, acc , 5U);
+    Can0.write(outMsg);
   }
 }
