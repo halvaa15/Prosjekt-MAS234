@@ -26,7 +26,6 @@
   #error "Teensy 3.6 with dual CAN bus is required to run this example"
 #endif
 
-const int ledPin = 13;
 
 static CAN_message_t msg;
 static uint8_t hex[17] = "0123456789abcdef";
@@ -48,10 +47,6 @@ static void hexDump(uint8_t dumpLen, uint8_t *bytePtr)
 // -------------------------------------------------------------
 void setup(void)
 {
-  delay(1000);
-
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, HIGH);
 
   struct CAN_filter_t defaultMask;
 
@@ -69,17 +64,6 @@ void setup(void)
   digitalWrite(28, LOW);
   digitalWrite(35, LOW);
 
-  msg.ext = 0;
-  msg.id = 0x100;
-  msg.len = 8;
-  msg.buf[0] = 10;
-  msg.buf[1] = 20;
-  msg.buf[2] = 0;
-  msg.buf[3] = 100;
-  msg.buf[4] = 128;
-  msg.buf[5] = 64;
-  msg.buf[6] = 32;
-  msg.buf[7] = 16;
 
     //Code to make the IMU work
   Wire.begin();
@@ -95,28 +79,27 @@ void setup(void)
 // -------------------------------------------------------------
 void loop(void)
 { 
-  
- 
-  while (ledMetro.check()) 
+  while (ledMetro.check() == 1) 
   {
-      CAN_message_t outMsg;
+    CAN_message_t outMsg;
  
-      Wire.beginTransmission(MPU_addr);
-      Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
-      Wire.endTransmission(false);
-      Wire.requestFrom(MPU_addr,14,true);  // request a total of 14 registers
+    Wire.beginTransmission(MPU_addr);
+    Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
+    Wire.endTransmission(false);
+    Wire.requestFrom(MPU_addr,6,true);  // request a total of 6 registers
 
-      int8_t acc [6];
-      acc[0]=Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
-      acc[1]=Wire.read();
-      acc[2]=Wire.read();  // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
-      acc[3]=Wire.read();
-      acc[4]=Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-      acc[5]=Wire.read();
+    int8_t acc [6];
+    acc[0]=Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
+    acc[1]=Wire.read();
+    acc[2]=Wire.read();  // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
+    acc[3]=Wire.read();
+    acc[4]=Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+    acc[5]=Wire.read();
     
-    outMsg.id = 0x22;   //
+    outMsg.id = 0x03;   //
     outMsg.len = 6U;    //The lenght of the message is 6 unsigned int
-    memcpy (outMsg.buf, acc , 5U);
+    memcpy (outMsg.buf, acc , 6U);
     Can0.write(outMsg);
+    Serial.println("Hei");
   }
 }
