@@ -5,83 +5,71 @@
  * Author : Fredrik
  */ 
 
+#define F_CPU	16000000UL
+
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 
-#include "lcd.h"
-
-#define LTHRES 500
-#define RTHRES 500
+double dutyCycle = 0.0;
+double lightConv = 0.0;
+double analogverdi = 0.0;
 
 // initialize adc
-void adc_init()
+void ADC_init()
 {
-	// AREF = AVcc
-	ADMUX = (1<<REFS0);
+	DDRC &= ~(1 << PC0); // set PC0 as input
 	
-	// ADC Enable and prescaler of 128
-	// 16000000/128 = 125000
-	ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);
+	ADMUX = (1 << REFS0);	// set reference selection to AVCC with external capacitor at AREF pin
+	
+	// enables  ADC with auto trigger, starts conversion and sets prescaler to clk/128
+	ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADATE) | (1 << ADIE) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
 }
 
-// read adc value
-uint16_t adc_read(uint8_t ch)
+void PWM_init_8bit()	// initializing PWM 8-bit
 {
-	// select the corresponding channel 0~7
-	// ANDing with '7' will always keep the value
-	// of 'ch' between 0 and 7
-	ch &= 0b00000111;  // AND operation with 7
-	ADMUX = (ADMUX & 0xF8)|ch;     // clears the bottom 3 bits before ORing
+	DDRD = (1 << PD6);	// set PD6 as output
 	
-	// start single conversion
-	// write '1' to ADSC
-	ADCSRA |= (1<<ADSC);
+	TCCR1A = (1 << COM0A1) | (1 << WGM00) | (1 << WGM01);	// set FAST 8-bit PWM, with clear OC0A on compare
+	TIMSK0 = (1 << TOIE0);	// set interrupt register to overflow interrupt
 	
-	// wait for conversion to complete
-	// ADSC becomes '0' again
-	// till then, run loop continuously
-	while(ADCSRA & (1<<ADSC));
+	sei();	// enables external interrupt
 	
-	return (ADC);
+	TCCR0B = (1 << CS02) | (1 << CS00);	// set prescaling register to clk/1024
+	OCR0A = (dutyCycle/100.0)*255.0;	// set clear on compare value
 }
 
-int main()
+int main(void)
 {
-	uint16_t adc_result0, adc_result1;
-	char int_buffer[10];
-	DDRC = 0x01;           // to connect led to PC0
-	
-	// initialize adc and lcd
-	adc_init();
-	lcd_init(LCD_DISP_ON_CURSOR);
-	
-	// display the labels on LCD
-	lcd_puts("left  ADC = ");
-	lcd_gotoxy(0,1);
-	lcd_puts("right ADC = ");
-	
-	_delay_ms(50);
+	ADC_init();	// enables ADC
+	PWM_init_8bit();	// enables FAST PWM 8-bit
 	
 	while(1)
 	{
-		adc_result0 = adc_read(0);      // read adc value at PA0
-		adc_result1 = adc_read(1);      // read adc value at PA1
-		
-		// condition for led to glow
-		if (adc_result0 < LTHRES && adc_result1 < RTHRES)
-		PORTC = 0x01;
-		else
-		PORTC = 0x00;
-		
-		// now display on lcd
-		itoa(adc_result0, int_buffer, 10);
-		lcd_gotoxy(12,0);
-		lcd_puts(int_buffer);
-		
-		itoa(adc_result1, int_buffer, 10);
-		lcd_gotoxy(12,1);
-		lcd_puts(int_buffer);
-		_delay_ms(50);
 	}
 }
+
+ISR(ADC_vect)
+{
+	analogverdi = static_cast<double>(ADC);	// converts ADC value from uint16_t to double
+	dutyCycle = (analogverdi/1023.0)*100.0;	// converts analogverdi to a 0-100 value (need 0-100 value for existing PWM program)
+}
+
+ISR(TIMER0_OVF_vect)
+{	
+	if (dutyCycle < 0.0)	// Prevents dutycycle from decreasing below 100 (causing OCR0A error)
+		{
+			dutyCycle = 0.0;
+		}
+	if (dutyCycle > 100.0)// Prevents dutycycle from increasing above 100 (causing OCR0A error)
+		{
+			dutyCycle = 100.0;
+		}
+
+	lightConv = (pow(dutyCycle,2)) / (100);	// converts calculated light value to perceived light value
+
+	OCR0A = (lightConv/100.0)*255.0;	// updates OCR0A value at every interrupt
+}
+
+
 

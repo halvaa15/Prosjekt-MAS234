@@ -153,7 +153,7 @@ END GROUP
 .rela.plt
  *(.rela.plt)
 
-.text           0x00000000       0xda
+.text           0x00000000       0xe0
  *(.vectors)
  .vectors       0x00000000       0x68 D:/Atmel studio 7/7.0/Packs/atmel/ATmega_DFP/1.2.132/gcc/dev/atmega168/avr5/crtatmega168.o
                 0x00000000                __vector_default
@@ -235,16 +235,19 @@ END GROUP
                 0x0000007c                __vector_20
                 0x00000080                . = ALIGN (0x2)
  *(.text.*)
- .text.main     0x00000080       0x1e main.o
-                0x00000080                main
+ .text._Z8PCI_initv
+                0x00000080       0x1c main.o
+                0x00000080                _Z8PCI_initv
+ .text.main     0x0000009c        0x8 main.o
+                0x0000009c                main
  .text.__vector_3
-                0x0000009e       0x38 main.o
-                0x0000009e                __vector_3
-                0x000000d6                . = ALIGN (0x2)
+                0x000000a4       0x38 main.o
+                0x000000a4                __vector_3
+                0x000000dc                . = ALIGN (0x2)
  *(.fini9)
- .fini9         0x000000d6        0x0 d:/atmel studio 7/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
-                0x000000d6                _exit
-                0x000000d6                exit
+ .fini9         0x000000dc        0x0 d:/atmel studio 7/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+                0x000000dc                _exit
+                0x000000dc                exit
  *(.fini9)
  *(.fini8)
  *(.fini8)
@@ -263,11 +266,11 @@ END GROUP
  *(.fini1)
  *(.fini1)
  *(.fini0)
- .fini0         0x000000d6        0x4 d:/atmel studio 7/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
+ .fini0         0x000000dc        0x4 d:/atmel studio 7/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
  *(.fini0)
-                0x000000da                _etext = .
+                0x000000e0                _etext = .
 
-.data           0x00800100        0x0 load address 0x000000da
+.data           0x00800100        0x0 load address 0x000000e0
                 [!provide]                PROVIDE (__data_start, .)
  *(.data)
  *(.data*)
@@ -284,8 +287,8 @@ END GROUP
  *(.bss*)
  *(COMMON)
                 [!provide]                PROVIDE (__bss_end, .)
-                0x000000da                __data_load_start = LOADADDR (.data)
-                0x000000da                __data_load_end = (__data_load_start + SIZEOF (.data))
+                0x000000e0                __data_load_start = LOADADDR (.data)
+                0x000000e0                __data_load_end = (__data_load_start + SIZEOF (.data))
 
 .noinit         0x00800100        0x0
                 [!provide]                PROVIDE (__noinit_start, .)
@@ -356,38 +359,38 @@ END GROUP
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x00000000       0x28
+.debug_aranges  0x00000000       0x30
  *(.debug_aranges)
  .debug_aranges
-                0x00000000       0x28 main.o
+                0x00000000       0x30 main.o
 
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000      0x71a
+.debug_info     0x00000000      0x741
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000      0x5f4 D:/Atmel studio 7/7.0/Packs/atmel/ATmega_DFP/1.2.132/gcc/dev/atmega168/avr5/crtatmega168.o
- .debug_info    0x000005f4      0x126 main.o
+ .debug_info    0x000005f4      0x14d main.o
 
-.debug_abbrev   0x00000000      0x680
+.debug_abbrev   0x00000000      0x6a6
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x5a2 D:/Atmel studio 7/7.0/Packs/atmel/ATmega_DFP/1.2.132/gcc/dev/atmega168/avr5/crtatmega168.o
- .debug_abbrev  0x000005a2       0xde main.o
+ .debug_abbrev  0x000005a2      0x104 main.o
 
-.debug_line     0x00000000      0x270
+.debug_line     0x00000000      0x286
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x133 D:/Atmel studio 7/7.0/Packs/atmel/ATmega_DFP/1.2.132/gcc/dev/atmega168/avr5/crtatmega168.o
- .debug_line    0x00000133      0x13d main.o
+ .debug_line    0x00000133      0x153 main.o
 
-.debug_frame    0x00000000       0x48
+.debug_frame    0x00000000       0x58
  *(.debug_frame)
- .debug_frame   0x00000000       0x48 main.o
+ .debug_frame   0x00000000       0x58 main.o
 
-.debug_str      0x00000000      0x418
+.debug_str      0x00000000      0x42e
  *(.debug_str)
  .debug_str     0x00000000      0x208 D:/Atmel studio 7/7.0/Packs/atmel/ATmega_DFP/1.2.132/gcc/dev/atmega168/avr5/crtatmega168.o
- .debug_str     0x00000208      0x210 main.o
-                                0x244 (size before relaxing)
+ .debug_str     0x00000208      0x226 main.o
+                                0x25a (size before relaxing)
 
 .debug_loc      0x00000000       0x91
  *(.debug_loc)
@@ -411,9 +414,9 @@ END GROUP
 .debug_pubtypes
  *(.debug_pubtypes)
 
-.debug_ranges   0x00000000       0x18
+.debug_ranges   0x00000000       0x20
  *(.debug_ranges)
- .debug_ranges  0x00000000       0x18 main.o
+ .debug_ranges  0x00000000       0x20 main.o
 
 .debug_macro
  *(.debug_macro)
