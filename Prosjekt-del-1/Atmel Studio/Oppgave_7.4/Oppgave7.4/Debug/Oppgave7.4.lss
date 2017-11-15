@@ -3,27 +3,27 @@ Oppgave7.4.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  000000ee  2**0
+  0 .data         00000000  00800100  00800100  000000ec  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000009a  00000000  00000000  00000054  2**1
+  1 .text         00000098  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  000000ee  2**0
+  2 .comment      00000030  00000000  00000000  000000ec  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000120  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  0000011c  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000020  00000000  00000000  0000015c  2**0
+  4 .debug_aranges 00000020  00000000  00000000  00000158  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000670  00000000  00000000  0000017c  2**0
+  5 .debug_info   00000670  00000000  00000000  00000178  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000005e9  00000000  00000000  000007ec  2**0
+  6 .debug_abbrev 000005e9  00000000  00000000  000007e8  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000198  00000000  00000000  00000dd5  2**0
+  7 .debug_line   00000192  00000000  00000000  00000dd1  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000024  00000000  00000000  00000f70  2**2
+  8 .debug_frame  00000024  00000000  00000000  00000f64  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000372  00000000  00000000  00000f94  2**0
+  9 .debug_str    0000039b  00000000  00000000  00000f88  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_ranges 00000010  00000000  00000000  00001306  2**0
+ 10 .debug_ranges 00000010  00000000  00000000  00001323  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -64,7 +64,7 @@ Disassembly of section .text:
   70:	de bf       	out	0x3e, r29	; 62
   72:	cd bf       	out	0x3d, r28	; 61
   74:	0e 94 40 00 	call	0x80	; 0x80 <main>
-  78:	0c 94 4b 00 	jmp	0x96	; 0x96 <_exit>
+  78:	0c 94 4a 00 	jmp	0x94	; 0x94 <_exit>
 
 0000007c <__bad_interrupt>:
   7c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -78,35 +78,34 @@ int main(void)
     DDRB &= ~(1 << PB0);	//DDR = data direction. B = område B på mikrokontrolleren. Setter PB0 (pinne 14) til å være 0, altså input
   80:	20 98       	cbi	0x04, 0	; 4
 	
-	PORTB |= (1 << PB0);	//Aktiverer intern pull-up resistor på inngang PB0 (pinne 14)
-  82:	28 9a       	sbi	0x05, 0	; 5
+//	PORTB |= (1 << PB0);	//Aktiverer intern pull-up resistor på inngang PB0 (pinne 14)
 	
-	DDRD |= (1 << PD0);		//Setter PD0 (pinne 2) til å være 1 (definerer den til å være en utgang)
-  84:	50 9a       	sbi	0x0a, 0	; 10
+	DDRD |= (1 << PD6);		//Setter PD0 (pinne 2) til å være 1 (definerer den til å være en utgang)
+  82:	56 9a       	sbi	0x0a, 6	; 10
 	
 	
     while (1)	//Begynner uendelig loop
     {
 		//Skru på lyset
 		if(BIT_IS_CLEAR(PINB, PB0)))		//Hvis pinne 14 er høy
-  86:	18 99       	sbic	0x03, 0	; 3
-  88:	02 c0       	rjmp	.+4      	; 0x8e <main+0xe>
+  84:	18 99       	sbic	0x03, 0	; 3
+  86:	02 c0       	rjmp	.+4      	; 0x8c <main+0xc>
 		{
-			PORTD |= (1 << PD0);	//Setter PD0 (pinne 2) høy, og LED-en lyser
-  8a:	58 9a       	sbi	0x0b, 0	; 11
-  8c:	fc cf       	rjmp	.-8      	; 0x86 <main+0x6>
+			PORTD |= (1 << PD6);	//Setter PD0 (pinne 2) høy, og LED-en lyser
+  88:	5e 9a       	sbi	0x0b, 6	; 11
+  8a:	fc cf       	rjmp	.-8      	; 0x84 <main+0x4>
 		}
 		
 		else if(BIT_IS_SET(PINB, PB0))	//Hvis pinne 14 er lav
-  8e:	18 9b       	sbis	0x03, 0	; 3
-  90:	fa cf       	rjmp	.-12     	; 0x86 <main+0x6>
+  8c:	18 9b       	sbis	0x03, 0	; 3
+  8e:	fa cf       	rjmp	.-12     	; 0x84 <main+0x4>
 		{
-			PORTD &= ~(1 << PD0);	//Setter PD0 (pinne 2) lav, og LED-en lyser ikke
-  92:	58 98       	cbi	0x0b, 0	; 11
-  94:	f8 cf       	rjmp	.-16     	; 0x86 <main+0x6>
+			PORTD &= ~(1 << PD6);	//Setter PD0 (pinne 2) lav, og LED-en lyser ikke
+  90:	5e 98       	cbi	0x0b, 6	; 11
+  92:	f8 cf       	rjmp	.-16     	; 0x84 <main+0x4>
 
-00000096 <_exit>:
-  96:	f8 94       	cli
+00000094 <_exit>:
+  94:	f8 94       	cli
 
-00000098 <__stop_program>:
-  98:	ff cf       	rjmp	.-2      	; 0x98 <__stop_program>
+00000096 <__stop_program>:
+  96:	ff cf       	rjmp	.-2      	; 0x96 <__stop_program>

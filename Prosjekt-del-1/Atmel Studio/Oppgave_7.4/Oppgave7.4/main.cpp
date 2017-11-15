@@ -14,9 +14,9 @@ int main(void)
 {
     DDRB &= ~(1 << PB0);	//DDR = data direction. B = område B på mikrokontrolleren. Setter PB0 (pinne 14) til å være 0, altså input
 	
-	PORTB |= (1 << PB0);	//Aktiverer intern pull-up resistor på inngang PB0 (pinne 14)
+//	PORTB |= (1 << PB0);	//Aktiverer intern pull-up resistor på inngang PB0 (pinne 14)
 	
-	DDRD |= (1 << PD0);		//Setter PD0 (pinne 2) til å være 1 (definerer den til å være en utgang)
+	DDRD |= (1 << PD6);		//Setter PD0 (pinne 2) til å være 1 (definerer den til å være en utgang)
 	
 	
     while (1)	//Begynner uendelig loop
@@ -24,12 +24,12 @@ int main(void)
 		//Skru på lyset
 		if(BIT_IS_CLEAR(PINB, PB0)))		//Hvis pinne 14 er høy
 		{
-			PORTD |= (1 << PD0);	//Setter PD0 (pinne 2) høy, og LED-en lyser
+			PORTD |= (1 << PD6);	//Setter PD0 (pinne 2) høy, og LED-en lyser
 		}
 		
 		else if(BIT_IS_SET(PINB, PB0))	//Hvis pinne 14 er lav
 		{
-			PORTD &= ~(1 << PD0);	//Setter PD0 (pinne 2) lav, og LED-en lyser ikke
+			PORTD &= ~(1 << PD6);	//Setter PD0 (pinne 2) lav, og LED-en lyser ikke
 		}
 		
 		else

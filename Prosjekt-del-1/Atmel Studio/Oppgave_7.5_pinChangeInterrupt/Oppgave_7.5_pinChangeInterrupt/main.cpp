@@ -36,11 +36,11 @@ int main(void)
 ISR(PCINT0_vect)
 {	
 	
-	cli();	// disables external interrupt (to prevent de-bounce)
+	cli();						// disables global interrupt (to prevent de-bounce)
 	
 	_delay_ms (5);
 	
-	sei();	// enables external interrupt
+	sei();						// enables global interrupt
 	
 	if (!(PINB & (1 << PB0)))	// is set high when button is pressed (input = false)
 	{
