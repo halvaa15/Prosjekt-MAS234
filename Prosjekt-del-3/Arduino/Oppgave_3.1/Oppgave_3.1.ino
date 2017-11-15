@@ -14,12 +14,12 @@
 //
 
 #include <FlexCAN.h>
+
 const int ledPin = 13;  //Creates a variable ledPin which is connected to the LED on the teensy
 
 #ifndef __MK66FX1M0__
   #error "Teensy 3.6 with dual CAN bus is required to run this example"
 #endif
-
 
 // -------------------------------------------------------------
 void setup(void)
@@ -36,14 +36,12 @@ void setup(void)
   Can0.begin(250000,defaultMask, 1, 1);  
   Can1.begin();
 
-  //if using enable pins on a transceiver they need to be set on
-  pinMode(28, OUTPUT);    //Using the alternative Can0 on pin 28 as output on the teensy 3.6 board
+  pinMode(28, OUTPUT);   
   pinMode(35, OUTPUT);
 
-  digitalWrite(28, LOW);  //Set the pins low such that they can speak with the PCAN
+  digitalWrite(28, LOW);
   digitalWrite(35, LOW);
 }
-
 
 // -------------------------------------------------------------
 void loop(void)
@@ -56,6 +54,18 @@ void loop(void)
     if (inMsg.id == 0x21) //Checks if Can0 recives a message on the ID 0x21
     {
       digitalWrite (ledPin, !digitalRead(ledPin));  //If the if-statement is true, the LED on the teensy toggels
+    }
+     if (((inMsg.buf[7] &= (1)) == (1)) && (inMsg.id == (0x22))) 
+    {
+      digitalWrite(ledPin, HIGH);   // The LED is written high
+      Serial.println("Høy");
+
+    }
+    // If the least significant bit in the first byte AND 1 equals 1, and the message ID is 0x22
+    if (((inMsg.buf[7] &= (1)) == (0)) && (inMsg.id == (0x22)))
+    {
+      digitalWrite(ledPin, LOW);    // The LED is written low
+      Serial.println("Lav");
     }
   }
 }

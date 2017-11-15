@@ -21,12 +21,11 @@
 
 const int ledPin = 13;
 
-
+static CAN_message_t msg;
+static uint8_t hex[17] = "0123456789abcdef";
 // -------------------------------------------------------------
 void setup(void)
 {
-  delay(1000);
-
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, HIGH);
 
@@ -60,26 +59,23 @@ void setup(void)
 
 }
 
-
 // -------------------------------------------------------------
 void loop(void)
 { 
   CAN_message_t inMsg;
-  
-  
   while (Can0.available()) 
   {
-    
-    if (((inMsg.buf[7] &= (1)) == (1)) && (inMsg.id == (0x22)))
+    Can0.read(inMsg);
+
+    // If the least significant bit in the first byte AND 1 equals 1, and the message ID is 0x22
+    if (((inMsg.buf[7] &= (1)) == (1)) && (inMsg.id == (0x22))) 
     {
-      digitalWrite(ledPin, HIGH);
-      Serial.println("Lyset settes høy");
+      digitalWrite(ledPin, HIGH);   // The LED is written high
     }
-    
+    // If the least significant bit in the first byte AND 1 equals 1, and the message ID is 0x22
     if (((inMsg.buf[7] &= (1)) == (0)) && (inMsg.id == (0x22)))
     {
-      digitalWrite(ledPin, LOW);
-      Serial.println("Lyset settes lavt");
+      digitalWrite(ledPin, LOW);    // The LED is written low
     }
   }
 }
