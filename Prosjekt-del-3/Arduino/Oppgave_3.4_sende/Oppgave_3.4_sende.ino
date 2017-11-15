@@ -15,38 +15,16 @@
 
 #include <FlexCAN.h>
 
+#include <Metro.h>
+Metro ledMetro = Metro(1000);
 
 #ifndef __MK66FX1M0__
   #error "Teensy 3.6 with dual CAN bus is required to run this example"
 #endif
 
-const int ledPin = 13;
-
-static CAN_message_t msg;
-static uint8_t hex[17] = "0123456789abcdef";
-
-// -------------------------------------------------------------
-static void hexDump(uint8_t dumpLen, uint8_t *bytePtr)
-{
-  uint8_t working;
-  while( dumpLen-- ) {
-    working = *bytePtr++;
-    Serial.write( hex[ working>>4 ] );
-    Serial.write( hex[ working&15 ] );
-  }
-  Serial.write('\r');
-  Serial.write('\n');
-}
-
-
 // -------------------------------------------------------------
 void setup(void)
 {
-  delay(1000);
-
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, HIGH);
-
   struct CAN_filter_t defaultMask;
 
   defaultMask.flags.remote = 0;
@@ -62,47 +40,27 @@ void setup(void)
 
   digitalWrite(28, LOW);
   digitalWrite(35, LOW);
-
-  msg.ext = 0;
-  msg.id = 0x100;
-  msg.len = 8;
-  msg.buf[0] = 10;
-  msg.buf[1] = 20;
-  msg.buf[2] = 0;
-  msg.buf[3] = 100;
-  msg.buf[4] = 128;
-  msg.buf[5] = 64;
-  msg.buf[6] = 32;
-  msg.buf[7] = 16;
 }
 
 
 // -------------------------------------------------------------
 void loop(void)
 { 
-  CAN_message_t inMsg;
-  while (Can0.available()) 
+  CAN_message_t outMsg;
+  int8_t i = 0;
+  while (ledMetro.check() == 1) 
   {
-    Can0.read(inMsg);
-   
-    if (inMsg.id == 33)
+    i++;
+    Serial.println(i);
+    if (i%2 == 1) // Checks if i is a odd number
     {
-      digitalWrite (ledPin, !digitalRead(ledPin));
-      Serial.println("Lyset toggles");
+      outMsg.id = 0x21; //Set the message ID to 0x21
+      Can0.write(outMsg);
     }
-    
-    if (((inMsg.buf[7] &= (1)) == (1)) && (inMsg.id == (34)))
+     if (i%2 == 0)  // Checks if i is an even nummber
     {
-      digitalWrite(ledPin, HIGH);
-      Serial.println("Lyset settes høy");
+      outMsg.id = 0x22; //Set the message ID to 0x21
+      Can0.write(outMsg);
     }
-    
-    if (((inMsg.buf[7] &= (1)) == (0)) && (inMsg.id == (34)))
-    {
-      digitalWrite(ledPin, LOW);
-      Serial.println("Lyset settes lavt");
-    }
-    
-    
   }
 }
