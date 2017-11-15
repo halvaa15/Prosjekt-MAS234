@@ -98,8 +98,8 @@ void loop(void)
       gyro[4]=Wire.read();  // 0x47 (GYRO_ZOUT_H)
       gyro[5]=Wire.read();  // 0x48 (GYRO_ZOUT_L)
 
-      outMsg.id = 0x111;   //
-      outMsg.len = 6U;    //The lenght of the message is 6 unsigned int
+      outMsg.id = 0x111;  // Gives the message ID 0x111
+      outMsg.len = 6U;    // The lenght of the message is 6 unsigned int
       memcpy (outMsg.buf, gyro , 6U);
       Can0.write(outMsg);
     }
