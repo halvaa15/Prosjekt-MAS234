@@ -9,26 +9,26 @@
 #define F_CPU 1000000UL
 #endif 
 
-#include <avr/io.h>		//Headerfil som gir oss forskjellige input/output operasjoner
-#include <util/delay.h>		//bibliotek for delay-funksjoner
+#include <avr/io.h>			// Header file for input/output functions
+#include <util/delay.h>		// delay/timer libraries
 
 
 
 
 int main(void)
 {
-    DDRD = 0b00000001;	//DDR = data direction. B = område B på mikrokontrolleren. Her setter vi pinne 0 på området B til å være en utgang. 
-	PORTD = 0b00000000;	
+    DDRD |= (1 << PD0);		// set PD0 as output
+	PORTD &= ~(1 << PD0);	// set PD0 to low	
 	
     while (1) 
     {
-		//Skru på lyset
-		PORTD |= 0b00000001;		//Setter pinnen PB0 til å være høy.
-		_delay_ms(100);
+		// LED on
+		PORTD |= (1 << PD0);		// set PD0 high
+		_delay_ms(1000);
 		
-		//Skru av lyset
-		PORTD &= 0b11111110;		//Setter pinnen til å være lav.
-		_delay_ms(100);
+		// LED off
+		PORTD &= ~(1 << PD0);		// set PD0 low
+		_delay_ms(1000);
 		
     }
 }

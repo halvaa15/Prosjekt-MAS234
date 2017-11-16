@@ -11,10 +11,10 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
-double dutyCycle = 0.0;
+double dutyCycle = 0.0;	// double is used due to value with decimal points
 int counterDir = 1;
 
-void PWM_init_8bit()	// initializing PWM 8-bit
+void PWM_init_8bit()	// initializing function for PWM 8-bit
 {
 	DDRD |= (1 << PD6);	// set PD6 as output
 	
@@ -29,14 +29,14 @@ void PWM_init_8bit()	// initializing PWM 8-bit
 
 int main(void)
 {
-	PWM_init_8bit(); // enables FAST PWM 8-bit
+	PWM_init_8bit(); // initializing FAST PWM 8-bit
 	
 	while(1)
 	{
 	}
 }
 
-ISR(TIMER0_OVF_vect)
+ISR(TIMER0_OVF_vect)	// timer0/counter0 overflow interrupt vector
 {
 	if (dutyCycle < 0.0)	// Prevents dutycycle from decreasing below 100 (causing OCR0A error)
 	{

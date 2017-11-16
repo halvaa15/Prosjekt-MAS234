@@ -15,12 +15,12 @@
 
 
 void setup()   {                
-  Serial.begin(38400);
+  Serial.begin(9600); // start serial with baud rate of 9600
 }
 
 void loop()                     
 {
-  Serial.println("Hello World");
+  Serial.println("Hello serial monitor");
   delay(1000);
 }
 
