@@ -11,7 +11,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
-void PCI_init()
+void PCI_init()					// initializing function for pin change interrupt
 {
 	DDRB &= ~(1 << PB0);		// set PB0 as input
 	PORTB |= (1 << PB0);		// set PB0 true (pull up)	
@@ -19,13 +19,13 @@ void PCI_init()
 	PCICR |= (1 << PCIE0);		// use PCIE0 (PB0) as pin change interrupt
 	PCMSK0 |= (1 << PCINT0);	// set pin change mask as PCINT0
 	
-	sei();						// enables external interrupt
+	sei();						// enables global interrupt
 }
 
 int main(void)
 {
 	DDRD |= (1 << PD6);			// set PD6 as output
-	PCI_init();					// enables pin change interrupt
+	PCI_init();					// initializing pin change interrupt
 
 	while (1)	
 	{
@@ -33,7 +33,7 @@ int main(void)
 }
 
 
-ISR(PCINT0_vect)
+ISR(PCINT0_vect)	// pin change interrupt vector
 {	
 	
 	cli();						// disables global interrupt (to prevent de-bounce)

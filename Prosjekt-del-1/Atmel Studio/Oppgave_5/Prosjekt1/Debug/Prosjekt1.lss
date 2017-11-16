@@ -3,29 +3,29 @@ Prosjekt1.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  000000fc  2**0
+  0 .data         00000000  00800100  00800100  00000106  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         000000a8  00000000  00000000  00000054  2**1
+  1 .text         000000b2  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  000000fc  2**0
+  2 .comment      00000030  00000000  00000000  00000106  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  0000012c  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000138  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000020  00000000  00000000  00000168  2**0
+  4 .debug_aranges 00000020  00000000  00000000  00000174  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000740  00000000  00000000  00000188  2**0
+  5 .debug_info   00000740  00000000  00000000  00000194  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 00000696  00000000  00000000  000008c8  2**0
+  6 .debug_abbrev 00000696  00000000  00000000  000008d4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000273  00000000  00000000  00000f5e  2**0
+  7 .debug_line   0000024f  00000000  00000000  00000f6a  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000024  00000000  00000000  000011d4  2**2
+  8 .debug_frame  00000024  00000000  00000000  000011bc  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000003bb  00000000  00000000  000011f8  2**0
+  9 .debug_str    000003e3  00000000  00000000  000011e0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    00000048  00000000  00000000  000015b3  2**0
+ 10 .debug_loc    00000048  00000000  00000000  000015c3  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000010  00000000  00000000  000015fb  2**0
+ 11 .debug_ranges 00000010  00000000  00000000  0000160b  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -66,7 +66,7 @@ Disassembly of section .text:
   70:	de bf       	out	0x3e, r29	; 62
   72:	cd bf       	out	0x3d, r28	; 61
   74:	0e 94 40 00 	call	0x80	; 0x80 <main>
-  78:	0c 94 52 00 	jmp	0xa4	; 0xa4 <_exit>
+  78:	0c 94 57 00 	jmp	0xae	; 0xae <_exit>
 
 0000007c <__bad_interrupt>:
   7c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -77,44 +77,49 @@ Disassembly of section .text:
 
 int main(void)
 {
-    DDRD = 0b00000001;	//DDR = data direction. B = område B på mikrokontrolleren. Her setter vi pinne 0 på området B til å være en utgang. 
-  80:	81 e0       	ldi	r24, 0x01	; 1
-  82:	8a b9       	out	0x0a, r24	; 10
-	PORTD = 0b00000000;	
-  84:	1b b8       	out	0x0b, r1	; 11
+    DDRD |= (1 << PD0);		// set PD0 as output
+  80:	50 9a       	sbi	0x0a, 0	; 10
+	PORTD &= ~(1 << PD0);	// set PD0 to low	
+  82:	58 98       	cbi	0x0b, 0	; 11
 	
     while (1) 
     {
-		//Skru på lyset
-		PORTD |= 0b00000001;		//Setter pinnen PB0 til å være høy.
-  86:	58 9a       	sbi	0x0b, 0	; 11
+		// LED on
+		PORTD |= (1 << PD0);		// set PD0 high
+  84:	58 9a       	sbi	0x0b, 0	; 11
 	#else
 		//round up by default
 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
-  88:	87 ea       	ldi	r24, 0xA7	; 167
-  8a:	91 e6       	ldi	r25, 0x61	; 97
-  8c:	01 97       	sbiw	r24, 0x01	; 1
-  8e:	f1 f7       	brne	.-4      	; 0x8c <main+0xc>
-  90:	00 c0       	rjmp	.+0      	; 0x92 <main+0x12>
-  92:	00 00       	nop
-		_delay_ms(100);
+  86:	2f e3       	ldi	r18, 0x3F	; 63
+  88:	8d e0       	ldi	r24, 0x0D	; 13
+  8a:	93 e0       	ldi	r25, 0x03	; 3
+  8c:	21 50       	subi	r18, 0x01	; 1
+  8e:	80 40       	sbci	r24, 0x00	; 0
+  90:	90 40       	sbci	r25, 0x00	; 0
+  92:	e1 f7       	brne	.-8      	; 0x8c <main+0xc>
+  94:	00 c0       	rjmp	.+0      	; 0x96 <main+0x16>
+  96:	00 00       	nop
+		_delay_ms(1000);
 		
-		//Skru av lyset
-		PORTD &= 0b11111110;		//Setter pinnen til å være lav.
-  94:	58 98       	cbi	0x0b, 0	; 11
-  96:	87 ea       	ldi	r24, 0xA7	; 167
-  98:	91 e6       	ldi	r25, 0x61	; 97
-  9a:	01 97       	sbiw	r24, 0x01	; 1
-  9c:	f1 f7       	brne	.-4      	; 0x9a <main+0x1a>
-  9e:	00 c0       	rjmp	.+0      	; 0xa0 <main+0x20>
-  a0:	00 00       	nop
-  a2:	f1 cf       	rjmp	.-30     	; 0x86 <main+0x6>
+		// LED off
+		PORTD &= ~(1 << PD0);		// set PD0 low
+  98:	58 98       	cbi	0x0b, 0	; 11
+  9a:	2f e3       	ldi	r18, 0x3F	; 63
+  9c:	8d e0       	ldi	r24, 0x0D	; 13
+  9e:	93 e0       	ldi	r25, 0x03	; 3
+  a0:	21 50       	subi	r18, 0x01	; 1
+  a2:	80 40       	sbci	r24, 0x00	; 0
+  a4:	90 40       	sbci	r25, 0x00	; 0
+  a6:	e1 f7       	brne	.-8      	; 0xa0 <main+0x20>
+  a8:	00 c0       	rjmp	.+0      	; 0xaa <main+0x2a>
+  aa:	00 00       	nop
+  ac:	eb cf       	rjmp	.-42     	; 0x84 <main+0x4>
 
-000000a4 <_exit>:
-  a4:	f8 94       	cli
+000000ae <_exit>:
+  ae:	f8 94       	cli
 
-000000a6 <__stop_program>:
-  a6:	ff cf       	rjmp	.-2      	; 0xa6 <__stop_program>
+000000b0 <__stop_program>:
+  b0:	ff cf       	rjmp	.-2      	; 0xb0 <__stop_program>

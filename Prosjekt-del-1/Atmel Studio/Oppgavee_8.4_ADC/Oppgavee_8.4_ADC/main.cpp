@@ -13,27 +13,26 @@
 
 double dutyCycle = 0.0;
 double lightConv = 0.0;
-double analogverdi = 0.0;
+double analogValue = 0.0;
 
-// initialize adc
-void ADC_init()
+void ADC_init()	// initializing function for analog to digital converter
 {
 	DDRC &= ~(1 << PC0); // set PC0 as input
 	
 	ADMUX = (1 << REFS0);	// set reference selection to AVCC with external capacitor at AREF pin
 	
-	// enables  ADC with auto trigger, starts conversion and sets prescaler to clk/128
+	// enables  ADC with auto trigger, starts conversion and sets prescaler to clk/128. Enables conversion complete interrupt.
 	ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADATE) | (1 << ADIE) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
 }
 
-void PWM_init_8bit()	// initializing PWM 8-bit
+void PWM_init_8bit()	// initializing function for PWM 8-bit
 {
-	DDRD = (1 << PD6);	// set PD6 as output
+	DDRD |= (1 << PD6);	// set PD6 as output
 	
 	TCCR1A = (1 << COM0A1) | (1 << WGM00) | (1 << WGM01);	// set FAST 8-bit PWM, with clear OC0A on compare
 	TIMSK0 = (1 << TOIE0);	// set interrupt register to overflow interrupt
 	
-	sei();	// enables external interrupt
+	sei();	// enables global interrupt
 	
 	TCCR0B = (1 << CS02) | (1 << CS00);	// set prescaling register to clk/1024
 	OCR0A = (dutyCycle/100.0)*255.0;	// set clear on compare value
@@ -41,21 +40,21 @@ void PWM_init_8bit()	// initializing PWM 8-bit
 
 int main(void)
 {
-	ADC_init();	// enables ADC
-	PWM_init_8bit();	// enables FAST PWM 8-bit
+	ADC_init();	// initializing ADC
+	PWM_init_8bit();	// initializing FAST PWM 8-bit
 	
 	while(1)
 	{
 	}
 }
 
-ISR(ADC_vect)
+ISR(ADC_vect)	// conversion complete interrupt vector
 {
-	analogverdi = static_cast<double>(ADC);	// converts ADC value from uint16_t to double
-	dutyCycle = (analogverdi/1023.0)*100.0;	// converts analogverdi to a 0-100 value (need 0-100 value for existing PWM program)
+	analogValue = static_cast<double>(ADC);	// converts ADC value from uint16_t to double
+	dutyCycle = (analogValue/1023.0)*100.0;	// converts analogverdi to a 0-100 value (need 0-100 value for existing PWM program)
 }
 
-ISR(TIMER0_OVF_vect)
+ISR(TIMER0_OVF_vect)	// counter overflow interrupt vector
 {	
 	if (dutyCycle < 0.0)	// Prevents dutycycle from decreasing below 100 (causing OCR0A error)
 		{

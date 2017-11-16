@@ -5,39 +5,32 @@
  * Author : Barstad
  */ 
 
-#include <avr/io.h>		//Headerfil som gir oss forskjellige input/output operasjoner
+#include <avr/io.h>
 
 #define BIT_IS_SET(byte, bit) (byte & (1 << bit))	//Sjekker et byte (f.eks. PINB) og sjekker om det tilhørende bit (f.eks. PB0) er 1
 #define BIT_IS_CLEAR(byte, bit) (!(byte & (1 << bit))	//Gjør det samme, men sjekker at tilhørende bit er 0
 
 int main(void)
 {
-    DDRB &= ~(1 << PB0);	//DDR = data direction. B = område B på mikrokontrolleren. Setter PB0 (pinne 14) til å være 0, altså input
+    DDRB &= ~(1 << PB0);	// set PB0 as input
 	
-//	PORTB |= (1 << PB0);	//Aktiverer intern pull-up resistor på inngang PB0 (pinne 14)
+	PORTB |= (1 << PB0);	// set PB0 high (pull up)
 	
-	DDRD |= (1 << PD6);		//Setter PD0 (pinne 2) til å være 1 (definerer den til å være en utgang)
+	DDRD |= (1 << PD6);		// set PD6 as output
 	
 	
-    while (1)	//Begynner uendelig loop
+    while (1)
     {
-		//Skru på lyset
-		if(BIT_IS_CLEAR(PINB, PB0)))		//Hvis pinne 14 er høy
+		// LED on
+		if(!(PINB & (1 << PB0)))		// true if PB0 is low (button pushed)
 		{
-			PORTD |= (1 << PD6);	//Setter PD0 (pinne 2) høy, og LED-en lyser
+			PORTD |= (1 << PD6);	// set PD6 high
 		}
-		
-		else if(BIT_IS_SET(PINB, PB0))	//Hvis pinne 14 er lav
+		// LED off
+		else if(PINB & (1 << PB0))	// true if PB0 is high (button not pushed)
 		{
-			PORTD &= ~(1 << PD6);	//Setter PD0 (pinne 2) lav, og LED-en lyser ikke
+			PORTD &= ~(1 << PD6);	// set PD6 low
 		}
-		
-		else
-		{
-		}
-		
     }
-	
-	return (0);		//Kun for å ikke få anmerkning på kompileringen
 }
 
